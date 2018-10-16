@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<link rel="icon" 
+      type="image/png" 
+      href="ikoni.png">
+      
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="iso-8859-1">
+
+<style>
+
+td {
+    color: #fff;
+    font-weight: bold;
+    background: #444;
+    border-radius: 8px;
+    width: 70px;
+    height: 30px;
+    text-align: center;
+    cursor: pointer;
+}
+
+td:hover {
+    background: #ccc;
+}
+
+td.current-chn {
+    background: #888;
+}
+
+td.empty {
+    background: #888;
+}
+
+</style>
+
+<title>Sony remote</title>
+</head>
+
+<body>
+
+<script src="jquery-1.12.4.min.js"></script>
+
+<script>
+
+const SONY_URL = "/cgi-bin/sony.cgi?host=192.168.1.204&code=";
+
+const codes = [
+    '*SCCHNN00000021.0000000',    // TV1
+    '*SCCHNN00000022.0000000',    // TV2
+    '*SCCHNN00000023.0000000',    // MTV3
+    '*SCCHNN00000024.0000000',    // Nelonen
+    '*SCCHNN00000025.0000000',    // Teema
+    '*SCCHNN00000026.0000000',    // Sub
+    
+    '*SCCHNN00000027.0000000',    // TV5
+    '*SCCHNN00000008.0000000',    // Liv
+    '*SCCHNN00000009.0000000',    // Jim
+    '*SCCHNN00000030.0000000',    // Kutonen
+    '*SCCHNN00000012.0000000',    // FOX
+    '*SCCHNN00000013.0000000',    // AVA
+
+    '*SCCHNN00000011.0000000',    // TLC
+    '*SCCHNN00000014.0000000',    // Hero
+    '*SCCHNN00000016.0000000',    // Frii
+    '*SCCHNN00000020.0000000',    // Nat Geo
+    '*SCIRCC0000000000000056',    // Netflix
+    '*SCINPT0000000100000002',    // Cast
+    
+    '*SCIRCC0000000000000031',    // Vol-
+    '*SCIRCC0000000000000030',    // Vol+
+    '*SCIRCC0000000000000034',    // Prog-
+    '*SCIRCC0000000000000033',    // Prog+
+    '*SCINPT0000000000000000',    // TV
+    'pwr',                        // Power
+
+    '*SCIRCC0000000000000005',    // i+
+    '*SCIRCC0000000000000003',    // Guide
+    '*SCIRCC0000000000000041',    // Exit
+    '',
+    '*SCIRCC0000000000000009',    // Up
+    '',
+
+    '',
+    '',
+    '',
+    '*SCIRCC0000000000000012',    // Left
+    '*SCIRCC0000000000000013',    // OK
+    '*SCIRCC0000000000000011',    // Right
+    
+    '',
+    '',
+    '',
+    '',
+    '*SCIRCC0000000000000010',    // Down
+    ''
+];
+
+$( document ).ready(function() {
+    init();
+});
+
+function init()
+{
+    $("td").click(function() {
+        var row = $(this).closest("tr").index();
+        var col = $(this).index();
+        var code = codes[row*6+col];
+        var self = this;
+
+        if (code == "")
+        {
+            return;
+        }
+        
+        if (code == "pwr")
+        {
+            togglePower();
+            return;
+        }
+        
+        sendCommand(code, function(res) {
+            if ($(self).prop("id").substr(0, 3) == "chn")
+            {
+                $("td").removeClass("current-chn");
+                $(self).addClass("current-chn");
+            }
+            
+            if ($(self).prop("id").substr(0, 3) == "upd")
+            {
+                update();
+            }
+        });
+    });
+    
+    update();    
+}
+
+function togglePower()
+{
+    // Get current power status
+    sendCommand("*SEPOWR################", function(res) {
+        var pwr = res.substr(22, 1);
+        if (pwr == "1")
+        {
+            sendCommand("*SCPOWR0000000000000000");
+        }
+        else
+        {
+            sendCommand("*SCPOWR0000000000000001");
+        }
+    });
+}
+
+function update()
+{
+    // Get current channel
+    sendCommand("*SECHNN################", function(res) {
+        var chn = res.substr(7, 8);
+        $("td").removeClass("current-chn");
+        $("#chn"+parseInt(chn)).addClass("current-chn");
+    });
+}
+
+function sendCommand(code, cb)
+{
+    $.get(SONY_URL + encodeURIComponent(code), function(res) {
+        console.log(res);
+        if (res == "CONNECT FAIL")
+        {
+            alert(res);
+        }
+        else if (cb)
+        {
+            cb(res);
+        }
+    });
+}
+
+</script>
+
+<table>
+<tr>
+    <td id="chn21">TV1</td>
+    <td id="chn22">TV2</td>
+    <td id="chn23">MTV3</td>
+    <td id="chn24">Nelonen</td>
+    <td id="chn25">Teema</td>
+    <td id="chn26">Sub</td>
+</tr>
+<tr>
+    <td id="chn27">TV5</td>
+    <td id="chn8">Liv</td>
+    <td id="chn9">Jim</td>
+    <td id="chn30">Kutonen</td>
+    <td id="chn12">FOX</td>
+    <td id="chn13">AVA</td>
+</tr>
+<tr>
+    <td id="chn11">TLC</td>
+    <td id="chn14">Hero</td>
+    <td id="chn16">Frii</td>
+    <td id="chn20">Nat Geo</td>
+    <td>Netflix</td>
+    <td>Cast</td>
+</tr>
+<tr>
+    <td>Vol -</td>
+    <td>Vol +</td>
+    <td id="upd">Prog -</td>
+    <td id="upd">Prog +</td>
+    <td>TV</td>
+    <td>Power</td>
+</tr>
+<tr>
+    <td>i+</td>
+    <td>Guide</td>
+    <td>Exit</td>
+    <td class="empty"></td>
+    <td>Up</td>
+    <td class="empty"></td>
+</tr>
+<tr>
+    <td class="empty"></td>
+    <td class="empty"></td>
+    <td class="empty"></td>
+    <td>Left</td>
+    <td id="upd">OK</td>
+    <td>Right</td>
+</tr>
+<tr>
+    <td class="empty"></td>
+    <td class="empty"></td>
+    <td class="empty"></td>
+    <td class="empty"></td>
+    <td>Down</td>
+    <td class="empty"></td>
+</tr>
+</table>
+
+</body>
+</html>
