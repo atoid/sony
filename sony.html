@@ -45,7 +45,8 @@ td.empty {
 
 <script>
 
-const SONY_URL = "/cgi-bin/sony.cgi?host=192.168.1.204&code=";
+const SONY_HOST = "192.168.1.204";
+const SONY_URL  = "/cgi-bin/sony.cgi";
 
 const codes = [
     '*SCCHNN00000021.0000000',    // TV1
@@ -166,9 +167,9 @@ function update()
 
 function sendCommand(code, cb)
 {
-    $.get(SONY_URL + encodeURIComponent(code), function(res) {
+    $.post(SONY_URL, {code: code, host: SONY_HOST}, function(res) {
         console.log(res);
-        if (res == "CONNECT FAIL")
+        if (res.indexOf(" FAIL") != -1)
         {
             alert(res);
         }
