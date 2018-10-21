@@ -48,6 +48,18 @@ td.empty {
 
 const SONY_HOST = "192.168.1.204";
 const SONY_URL  = "/cgi-bin/sony.cgi";
+const AUTO_HD = true;
+
+const toHd = [
+    {chn: 1, index: 0},
+    {chn: 2, index: 1},
+    {chn: 3, index: 2},
+    {chn: 4, index: 3},
+    {chn: 5, index: 4},
+    {chn: 6, index: 5},
+    {chn: 7, index: 6},
+    {chn: 10, index: 9}
+];
 
 const codes = [
     '*SCCHNN00000021.0000000',    // TV1
@@ -137,7 +149,7 @@ function init()
         });
     });
     
-    update();    
+    update(AUTO_HD);    
 }
 
 function togglePower()
@@ -156,13 +168,27 @@ function togglePower()
     });
 }
 
-function update()
+function update(autoHd)
 {
     // Get current channel
     sendCommand("*SECHNN################", function(res) {
         var chn = res.substr(7, 8);
         $("td").removeClass("current-chn");
         $("#chn"+parseInt(chn)).addClass("current-chn");
+
+        if (autoHd)
+        {
+            for (var i of toHd)
+            {
+                if (i.chn == chn)
+                {
+                    console.log("Auto change to HD channel");
+                    var code = codes[i.index];
+                    sendCommand(code, update);
+                    break;
+                }
+            }
+        }
     });
 }
 
