@@ -1,3 +1,3 @@
 sony: sony.c
-	gcc -Wall -l cgic sony.c -o sony
+	gcc -Wall -l cgic sony.c -o sony.cgi
 
