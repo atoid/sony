@@ -24,7 +24,8 @@ td {
 }
 
 td:hover {
-    background: #ccc;
+    /*background: #ccc;*/
+    opacity: 0.7
 }
 
 td.current-chn {
@@ -33,6 +34,22 @@ td.current-chn {
 
 td.empty {
     background: #888;
+}
+
+td.red {
+    background: red;
+}
+
+td.green {
+    background: green;
+}
+
+td.yellow {
+    background: yellow;
+}
+
+td.blue {
+    background: blue;
 }
 
 </style>
@@ -46,9 +63,9 @@ td.empty {
 
 <script>
 
-const SONY_HOST = "192.168.1.204";
+const SONY_HOST = "192.168.1.218";
 const SONY_URL  = "/cgi-bin/sony.cgi";
-const AUTO_HD = true;
+const AUTO_HD = false;
 
 const toHd = [
     {chn: 1, index: 0},
@@ -97,19 +114,26 @@ const codes = [
     '*SCIRCC0000000000000009',    // Up
     '',
 
-    '',
-    '',
-    '',
+    '*SCIRCC0000000000000032',    // Vol mute
+    '*SCTPMU################',    // Pic mute
+    '*SCIRCC0000000000000092',    // Title list
     '*SCIRCC0000000000000012',    // Left
     '*SCIRCC0000000000000013',    // OK
     '*SCIRCC0000000000000011',    // Right
     
-    '',
-    '',
-    '',
+    '*SCIRCC0000000000000073',    // TV pause
+    '*SCIRCC0000000000000083',    // Rec
+    '*SCIRCC0000000000000081',    // Stop
     '',
     '*SCIRCC0000000000000010',    // Down
-    ''
+    '',
+    
+    '',
+    '',
+    '*SCIRCC0000000000000014',    // Red
+    '*SCIRCC0000000000000015',    // Green
+    '*SCIRCC0000000000000016',    // Yellow
+    '*SCIRCC0000000000000017'     // Blue
 ];
 
 $( document ).ready(function() {
@@ -251,20 +275,28 @@ function sendCommand(code, cb)
     <td class="empty"></td>
 </tr>
 <tr>
-    <td class="empty"></td>
-    <td class="empty"></td>
-    <td class="empty"></td>
+    <td>Mute</td>
+    <td>P-Mute</td>
+    <td>Titles</td>
     <td>Left</td>
     <td id="upd">OK</td>
     <td>Right</td>
 </tr>
 <tr>
-    <td class="empty"></td>
-    <td class="empty"></td>
-    <td class="empty"></td>
+    <td>TV ||</td>
+    <td>Rec</td>
+    <td>Stop</td>
     <td class="empty"></td>
     <td>Down</td>
     <td class="empty"></td>
+</tr>
+<tr>
+    <td class="empty"></td>
+    <td class="empty"></td>
+    <td class="red">&nbsp;</td>
+    <td class="green">&nbsp;</td>
+    <td class="yellow">&nbsp;</td>
+    <td class="blue">&nbsp;</td>
 </tr>
 </table>
 
